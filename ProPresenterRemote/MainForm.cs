@@ -95,7 +95,10 @@ namespace ProPresenterRemote
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
-            this.client.Dispose();
+            if (this.client != null)
+            {
+                this.client.Dispose();
+            }
         }
 
         private void OnStageDisplaySelectedIndexChanged(object sender, EventArgs e)

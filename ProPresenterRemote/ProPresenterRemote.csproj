@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>timer.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Zeroconf, Version=4.0.0.90, Culture=neutral, PublicKeyToken=e60c4f4a95e1099e, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Zeroconf.0.9.0.0\lib\Net20\Mono.Zeroconf.dll</HintPath>
@@ -116,12 +119,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="timer.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="control_play_blue.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="control_stop.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="play.png" />

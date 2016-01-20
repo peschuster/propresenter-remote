@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ProPresenterRemote
@@ -24,9 +18,15 @@ namespace ProPresenterRemote
 
         private bool wasOverrunning;
 
+        private bool running;
+
         public TimerItem()
         {
             this.InitializeComponent();
+            this.imageList.Images.Add(Properties.Resources.play);
+            this.imageList.Images.Add(Properties.Resources.stop);
+
+            this.btnStartStop.ImageIndex = 0;
         }
 
         public void SetValues(ProPresenterTimer timer)
@@ -37,20 +37,20 @@ namespace ProPresenterRemote
             switch (timer.TimerType)
             {
                 case TimerType.CountDownTimer:
-                    this.label3.Text = "Duration";
-                    this.txbType.Text = "Countdown";
+                    this.label3.Text = @"Duration";
+                    this.txbType.Text = @"Countdown";
                     this.txbDuration.Enabled = true;
                     this.txbEndTime.Enabled = false;
                     break;
                 case TimerType.CountDownToTimer:
-                    this.label3.Text = "Time";
-                    this.txbType.Text = "Count To Time";
+                    this.label3.Text = @"Time";
+                    this.txbType.Text = @"Count To Time";
                     this.txbDuration.Enabled = true;
                     this.txbEndTime.Enabled = false;
                     break;
                 case TimerType.ElapsedTimer:
-                    this.label3.Text = "Duration";
-                    this.txbType.Text = "Elapsed";
+                    this.label3.Text = @"Duration";
+                    this.txbType.Text = @"Elapsed";
                     this.txbDuration.Enabled = false;
                     this.txbEndTime.Enabled = true;
                     break;
@@ -59,8 +59,8 @@ namespace ProPresenterRemote
                     break;
             }
 
-            this.txbDuration.Text = timer.Duration;
-            this.txbEndTime.Text = timer.EndTime;
+            this.txbDuration.SetDelayed(timer.Duration);
+            this.txbEndTime.SetDelayed(timer.EndTime);
 
             TimeSpan ts1, ts2;
 
@@ -70,11 +70,12 @@ namespace ProPresenterRemote
                 || (TimerType.ElapsedTimer == timer.TimerType && TimeSpan.TryParse(timer.EndTime, out ts1) && (ts2 > ts1 || (ts2 == ts1 && this.wasOverrunning))));
 
             this.wasOverrunning = isOverrunning;
+            this.chkOverrun.Checked = timer.Overrun;
 
             this.txbTime.Text = timer.Time;
 
-            this.chkRunning.Checked = timer.Running;
-            this.chkOverrun.Checked = timer.Overrun;
+            this.running = timer.Running;
+            this.btnStartStop.ImageIndex = this.running ? 1 : 0;
 
             if (isOverrunning)
             {
@@ -97,34 +98,39 @@ namespace ProPresenterRemote
             timer.Overrun = this.chkOverrun.Checked;
         }
 
-        private void chkRunning_CheckedChanged(object sender, EventArgs e)
+        private void OnBtnStartStopClick(object sender, EventArgs e)
         {
-            if (this.chkRunning.Checked)
-            {
-                this.Trigger(this.StartTriggered);
-            }
-            else
+            if (this.running)
             {
                 this.Trigger(this.StopTriggered);
             }
+            else
+            {
+                this.Trigger(this.StartTriggered);
+            }
         }
 
-        private void btnReset_Click(object sender, EventArgs e)
+        private void OnBtnResetClick(object sender, EventArgs e)
         {
             this.Trigger(this.ResetTriggered);
         }
 
+        private void OnValueChanged(object sender, EventArgs e)
+        {
+            TimeTextBox timeTextBox = sender as TimeTextBox;
+
+            if (timeTextBox == null || timeTextBox.IsValid())
+            {
+                this.Trigger(this.UpdateTriggered);
+            }
+        }
+        
         private void Trigger(EventHandler<int> eventHandler)
         {
             if (eventHandler != null && this.index >= 0)
             {
                 eventHandler(this, this.index);
             }
-        }
-
-        private void OnValueChanged(object sender, EventArgs e)
-        {
-            this.Trigger(this.UpdateTriggered);
         }
     }
 }

@@ -81,6 +81,9 @@
       <DependentUpon>TimerItem.cs</DependentUpon>
     </Compile>
     <Compile Include="TimerType.cs" />
+    <Compile Include="TimeTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -113,6 +116,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="timer.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="control_play_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="control_stop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="play.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="stop.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

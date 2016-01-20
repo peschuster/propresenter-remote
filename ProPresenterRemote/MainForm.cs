@@ -98,6 +98,16 @@ namespace ProPresenterRemote
             this.client.Dispose();
         }
 
+        private void OnStageDisplaySelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.client.Send(
+                new
+                {
+                    action = "stageDisplaySetIndex",
+                    stageDisplayIndex = this.ddlStageDisplay.SelectedIndex
+                });
+        }
+
         private void OnBtnStartClick(object sender, EventArgs e)
         {
             this.client = new Client(this.txbPassword.Text);
@@ -105,13 +115,22 @@ namespace ProPresenterRemote
             this.client.StageDisplayLayoutsChanged += (_, args) => this.Invoke(
                 () =>
                 {
+                    this.ddlStageDisplay.SelectedIndexChanged -= this.OnStageDisplaySelectedIndexChanged;
+
                     this.ddlStageDisplay.Items.Clear();
 
                     this.ddlStageDisplay.Items.AddRange(this.client.StageDisplaySet);
                     this.ddlStageDisplay.SelectedIndex = this.client.StageDisplayIndex;
+
+                    this.ddlStageDisplay.SelectedIndexChanged += this.OnStageDisplaySelectedIndexChanged;
                 });
 
-            this.client.Authenticated += (_, args) => this.Invoke(() => { this.grpStageDisplay.Enabled = true; this.grpClocks.Enabled = true; });
+            this.client.Authenticated += (_, args) => this.Invoke(
+                () =>
+                {
+                    this.grpStageDisplay.Enabled = true;
+                    this.grpClocks.Enabled = true;
+                });
 
             this.client.ClocksChanged += (_, args) => this.Invoke(
                 () =>
@@ -136,6 +155,7 @@ namespace ProPresenterRemote
 
 
             this.client.StartConnection();
+
             this.txbPassword.Enabled = false;
             this.btn.Enabled = false;
         }

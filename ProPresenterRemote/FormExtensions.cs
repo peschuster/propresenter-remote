@@ -7,7 +7,10 @@ namespace ProPresenterRemote
     {
         public static void Invoke(this Control control, Action action)
         {
-            control.Invoke((Delegate)action);
+            if (control == null)
+                return;
+
+            control.Invoke(action);
         }
     }
 }

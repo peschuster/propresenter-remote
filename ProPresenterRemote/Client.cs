@@ -14,6 +14,8 @@ namespace ProPresenterRemote
     {
         private readonly string password;
 
+        private readonly ServiceBrowser serviceBrowser = new ServiceBrowser();
+
         private WebSocket ws;
 
         private Timer refetchTimer;
@@ -27,11 +29,27 @@ namespace ProPresenterRemote
         public Client(string password)
         {
             this.password = password;
+
+            this.serviceBrowser.ServiceAdded += (_, args) => {
+                args.Service.Resolved += (__, args2) => {
+                    IResolvableService s = args2.Service;
+                    this.Connect(s.HostEntry.AddressList[0], 50001);
+                };
+
+                args.Service.Resolve();
+            };
         }
+
+        public List<ProPresenterTimer> Timers { get; private set; }
+
+        public string[] StageDisplaySet { get; private set; }
+
+        public int StageDisplayIndex { get; private set; }
 
         private void Connect(IPAddress address, int port)
         {
-            if (this.ws != null && (this.ws.ReadyState == WebSocketState.Connecting || this.ws.ReadyState == WebSocketState.Open))
+            if (this.ws != null 
+                && (this.ws.ReadyState == WebSocketState.Connecting || this.ws.ReadyState == WebSocketState.Open))
                 return;
 
             if (this.ws != null)
@@ -42,6 +60,15 @@ namespace ProPresenterRemote
 
             this.ws = new WebSocket("ws://" + address + ":" + port + "/remote");
             this.ws.OnMessage += (sender, args) => { this.OnReceive(args.Data); };
+            this.ws.OnError += (sender, args) =>
+            {
+                if (!this.ws.IsAlive)
+                {
+                    this.ws.Close();
+                    this.ws.Connect();
+                }
+            };
+
             this.ws.Connect();
 
             if (this.ws.ReadyState == WebSocketState.Open)
@@ -60,23 +87,8 @@ namespace ProPresenterRemote
 
         public void StartConnection()
         {
-            ServiceBrowser browser = new ServiceBrowser();
-            
-            browser.ServiceAdded += (_, args) => {
-                args.Service.Resolved += (__, args2) => {
-                    IResolvableService s = args2.Service;
-                    this.Connect(s.HostEntry.AddressList[0], 50001);
-                };
-
-                args.Service.Resolve();
-            };
-            
-            browser.Browse("_pro6proremote._tcp", "local");
+            this.serviceBrowser.Browse("_pro6proremote._tcp", "local");
         }
-
-        public string[] StageDisplaySet { get; private set; }
-
-        public int StageDisplayIndex { get; private set; }
 
         public void QueryStageDisplay()
         {
@@ -100,58 +112,52 @@ namespace ProPresenterRemote
 
         public void Send(object data)
         {
-            string sending = JsonConvert.SerializeObject(data);
-            this.ws.Send(sending);
+            string json = JsonConvert.SerializeObject(data);
+
+            this.ws.Send(json);
         }
 
         public void SendAction(string action)
         {
-            string sending = JsonConvert.SerializeObject(new { action });
-            this.ws.Send(sending);
+            this.Send(new { action });
         }
 
-        public void OnReceive(string json)
+        private void OnReceive(string input)
         {
             try
             {
-                JObject jobject = JObject.Parse(json);
-                string stringValue = jobject.GetStringValue("action", (string)null);
+                JObject json = JObject.Parse(input);
+
+                string stringValue = json.GetStringValue("action");
+
                 if (string.IsNullOrEmpty(stringValue))
                     return;
 
                 switch (stringValue)
                 {
                     case "authenticate":
-                        if (this.Authenticated != null)
-                        {
-                            this.Authenticated(this, EventArgs.Empty);
-                        }
+                        this.Trigger(this.Authenticated);
                         break;
                     case "stageDisplaySets":
-                        string[] stageDisplaySet = jobject.GetValue("stageDisplaySets").ToObject<string[]>();
-                        int stageDisplayIndex = jobject.GetIntValue("stageDisplayIndex");
+                        string[] stageDisplaySet = json.GetValue("stageDisplaySets").ToObject<string[]>();
+                        int stageDisplayIndex = json.GetIntValue("stageDisplayIndex");
                         if (this.StageDisplaySet == null || stageDisplaySet.Length != this.StageDisplaySet.Length || !stageDisplaySet.All(this.StageDisplaySet.Contains) || this.StageDisplayIndex != stageDisplayIndex)
                         {
                             this.StageDisplaySet = stageDisplaySet;
                             this.StageDisplayIndex = stageDisplayIndex;
-                            if (this.StageDisplayLayoutsChanged != null)
-                            {
-                                this.StageDisplayLayoutsChanged(this, EventArgs.Empty);
-                            }
+                            this.Trigger(this.StageDisplayLayoutsChanged);
                         }
                         break;
                     case "clockRequest":
-                        this.Timers = jobject.GetValue("clockInfo").ToObject<ProPresenterTimer[]>().ToList();
+                        this.Timers = json.GetValue("clockInfo").ToObject<ProPresenterTimer[]>().ToList();
 
                         int i = 0;
                         foreach (var timer in this.Timers)
                         {
                             timer.Index = i++;
                         }
-                        if (this.ClocksChanged != null)
-                        {
-                            this.ClocksChanged(this, EventArgs.Empty);
-                        }
+
+                        this.Trigger(this.ClocksChanged);
 
                         break;
                 }
@@ -162,13 +168,16 @@ namespace ProPresenterRemote
             }
         }
 
-        public List<ProPresenterTimer> Timers { get; private set; }
-
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         public void Dispose()
         {
+            if (this.serviceBrowser != null)
+            {
+                this.serviceBrowser.Dispose();
+            }
+
             if (this.refetchTimer != null)
             {
                 this.refetchTimer.Dispose();
@@ -179,6 +188,14 @@ namespace ProPresenterRemote
             {
                 this.ws.Close();
                 this.ws = null;
+            }
+        }
+
+        private void Trigger(EventHandler eventHandler)
+        {
+            if (eventHandler != null)
+            {
+                eventHandler(this, EventArgs.Empty);
             }
         }
     }

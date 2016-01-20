@@ -98,7 +98,7 @@
             this.timerItem4.Location = new System.Drawing.Point(6, 229);
             this.timerItem4.Name = "timerItem4";
             this.timerItem4.Size = new System.Drawing.Size(583, 64);
-            this.timerItem4.TabIndex = 0;
+            this.timerItem4.TabIndex = 3;
             // 
             // timerItem3
             // 
@@ -107,7 +107,7 @@
             this.timerItem3.Location = new System.Drawing.Point(6, 159);
             this.timerItem3.Name = "timerItem3";
             this.timerItem3.Size = new System.Drawing.Size(583, 64);
-            this.timerItem3.TabIndex = 0;
+            this.timerItem3.TabIndex = 2;
             // 
             // timerItem2
             // 
@@ -116,7 +116,7 @@
             this.timerItem2.Location = new System.Drawing.Point(6, 89);
             this.timerItem2.Name = "timerItem2";
             this.timerItem2.Size = new System.Drawing.Size(583, 64);
-            this.timerItem2.TabIndex = 0;
+            this.timerItem2.TabIndex = 1;
             // 
             // timerItem1
             // 
@@ -141,7 +141,7 @@
             this.txbPassword.Location = new System.Drawing.Point(93, 19);
             this.txbPassword.Name = "txbPassword";
             this.txbPassword.Size = new System.Drawing.Size(100, 20);
-            this.txbPassword.TabIndex = 3;
+            this.txbPassword.TabIndex = 0;
             this.txbPassword.Text = "123";
             // 
             // btn
@@ -149,12 +149,12 @@
             this.btn.Location = new System.Drawing.Point(199, 17);
             this.btn.Name = "btn";
             this.btn.Size = new System.Drawing.Size(46, 23);
-            this.btn.TabIndex = 4;
+            this.btn.TabIndex = 1;
             this.btn.Text = "Start";
             this.btn.UseVisualStyleBackColor = true;
             this.btn.Click += new System.EventHandler(this.OnBtnStartClick);
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;

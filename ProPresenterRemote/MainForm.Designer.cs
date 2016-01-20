@@ -1,6 +1,6 @@
 ﻿namespace ProPresenterRemote
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.grpStageDisplay = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
             this.ddlStageDisplay = new System.Windows.Forms.ComboBox();
@@ -152,7 +152,7 @@
             this.btn.TabIndex = 4;
             this.btn.Text = "Start";
             this.btn.UseVisualStyleBackColor = true;
-            this.btn.Click += new System.EventHandler(this.btn_Click);
+            this.btn.Click += new System.EventHandler(this.OnBtnStartClick);
             // 
             // Form1
             // 
@@ -166,10 +166,9 @@
             this.Controls.Add(this.grpStageDisplay);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(635, 485);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "ProPresenter Remote Clock Manager";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
             this.grpStageDisplay.ResumeLayout(false);
             this.grpStageDisplay.PerformLayout();
             this.grpClocks.ResumeLayout(false);

@@ -10,13 +10,13 @@ using System.Windows.Forms;
 
 namespace ProPresenterRemote
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
+        private readonly List<TimerItem> timerItems;
+
         private Client client;
 
-        private List<TimerItem> timerItems;
-
-        public Form1()
+        public MainForm()
         {
             this.InitializeComponent();
             this.grpStageDisplay.Enabled = false;
@@ -93,16 +93,12 @@ namespace ProPresenterRemote
             }
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
             this.client.Dispose();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-        }
-
-        private void btn_Click(object sender, EventArgs e)
+        private void OnBtnStartClick(object sender, EventArgs e)
         {
             this.client = new Client(this.txbPassword.Text);
 

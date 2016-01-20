@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Mono.Zeroconf;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,7 +10,7 @@ using WebSocketSharp;
 
 namespace ProPresenterRemote
 {
-    class Client : IDisposable
+    internal class Client : IDisposable
     {
         private readonly string password;
 
@@ -43,7 +40,7 @@ namespace ProPresenterRemote
                 this.ws = null;
             }
 
-            this.ws = new WebSocket("ws://" + address.ToString() + ":" + port + "/remote");
+            this.ws = new WebSocket("ws://" + address + ":" + port + "/remote");
             this.ws.OnMessage += (sender, args) => { this.OnReceive(args.Data); };
             this.ws.Connect();
 
@@ -66,12 +63,8 @@ namespace ProPresenterRemote
             ServiceBrowser browser = new ServiceBrowser();
             
             browser.ServiceAdded += (_, args) => {
-                Console.WriteLine(@"Found Service: {0}", args.Service.Name);
-
                 args.Service.Resolved += (__, args2) => {
                     IResolvableService s = args2.Service;
-                    Console.WriteLine(@"Resolved Service: {0} - {1}:{2} ({3} TXT record entries)", s.FullName, s.HostEntry.AddressList[0], s.Port, s.TxtRecord.Count);
-
                     this.Connect(s.HostEntry.AddressList[0], 50001);
                 };
 
@@ -101,7 +94,7 @@ namespace ProPresenterRemote
                 {
                     action = "authenticate",
                     protocol = 610,
-                    password = this.password
+                    this.password
                 });
         }
 
@@ -113,7 +106,7 @@ namespace ProPresenterRemote
 
         public void SendAction(string action)
         {
-            string sending = JsonConvert.SerializeObject(new { action = action });
+            string sending = JsonConvert.SerializeObject(new { action });
             this.ws.Send(sending);
         }
 
@@ -134,69 +127,6 @@ namespace ProPresenterRemote
                             this.Authenticated(this, EventArgs.Empty);
                         }
                         break;
-                    case "clearAll":
-                        ////this.HandleClearAll();
-                        break;
-                    case "clearText":
-                        ////this.HandleClearText();
-                        break;
-                    case "clearVideo":
-                        ////this.HandleClearVideo();
-                        break;
-                    case "clearAudio":
-                        ////this.HandleClearAudio();
-                        break;
-                    case "clearProps":
-                        ////this.HandleClearProps();
-                        break;
-                    case "clearToLogo":
-                        ////this.HandleClearToLogo();
-                        break;
-                    case "libraryRequest":
-                        ////this.HandleLibraryRequest();
-                        break;
-                    case "playlistRequestAll":
-                        ////this.HandlePlaylistRequestAll();
-                        break;
-                    case "playlistRequest":
-                        ////this.HandlePlaylistRequest();
-                        break;
-                    case "presentationCurrent":
-                        ////this.HandlePresentationCurrent((JToken)jobject);
-                        break;
-                    case "presentationCurrentIndex":
-                        ////this.HandlePresentationCurrentIndex();
-                        break;
-                    case "presentationSlideIndex":
-                        ////this.HandlePresentationSlideIndex();
-                        break;
-                    case "presentationRequest":
-                        ////this.HandlePresentationRequest((JToken)jobject);
-                        break;
-                    case "presentationTriggerNext":
-                        ////this.HandlePresentationTriggerNext((JToken)jobject);
-                        break;
-                    case "presentationTriggerPrevious":
-                        ////this.HandlePresentationTriggerPrevious((JToken)jobject);
-                        break;
-                    case "presentationTriggerIndex":
-                        ////this.HandlePresentationTriggerIndex((JToken)jobject);
-                        break;
-                    case "presentationTimelineRewind":
-                        ////this.HandlePresentationTimelineRewind((JToken)jobject);
-                        break;
-                    case "presentationTimelinePlayPause":
-                        ////this.HandlePresentationTimelinePlayPause((JToken)jobject);
-                        break;
-                    case "messageRequest":
-                        ////this.HandleMessageRequest();
-                        break;
-                    case "messageSend":
-                        ////this.HandleMessageSend((JToken)jobject);
-                        break;
-                    case "messageHide":
-                        ////this.HandleMessageHide((JToken)jobject);
-                        break;
                     case "stageDisplaySets":
                         string[] stageDisplaySet = jobject.GetValue("stageDisplaySets").ToObject<string[]>();
                         int stageDisplayIndex = jobject.GetIntValue("stageDisplayIndex");
@@ -209,15 +139,6 @@ namespace ProPresenterRemote
                                 this.StageDisplayLayoutsChanged(this, EventArgs.Empty);
                             }
                         }
-                        break;
-                    case "stageDisplaySendMessage":
-                        ////this.HandleStageDisplayMessageSend((JToken)jobject);
-                        break;
-                    case "stageDisplayHideMessage":
-                        ////this.HandleStageDisplayMessageHide();
-                        break;
-                    case "stageDisplaySetIndex":
-                        ////this.HandleStageDisplaySetIndex((JToken)jobject);
                         break;
                     case "clockRequest":
                         this.Timers = jobject.GetValue("clockInfo").ToObject<ProPresenterTimer[]>().ToList();
@@ -232,75 +153,6 @@ namespace ProPresenterRemote
                             this.ClocksChanged(this, EventArgs.Empty);
                         }
 
-                        break;
-                    case "clockStart":
-                        ////this.HandleClockStart((JToken)jobject);
-                        break;
-                    case "clockStop":
-                        ////this.HandleClockStop((JToken)jobject);
-                        break;
-                    case "clockReset":
-                        ////this.HandleClockReset((JToken)jobject);
-                        break;
-                    case "clockResetAll":
-                        ////this.HandleClockResetAll();
-                        break;
-                    case "clockStopAll":
-                        ////this.HandleClockStopAll();
-                        break;
-                    case "clockStartAll":
-                        ////this.HandleClockStartAll();
-                        break;
-                    case "clockUpdate":
-                        ////this.HandleClockUpdate((JToken)jobject);
-                        break;
-                    case "clockStartSendingCurrentTime":
-                        ////this.HandleClockStartSendingCurrentTime();
-                        break;
-                    case "clockStopSendingCurrentTime":
-                        ////this.HandleClockStopSendingCurrentTime();
-                        break;
-                    case "socialSendTweet":
-                        ////this.HandleSocialSendTweet((JToken)jobject);
-                        break;
-                    case "socialSendInstagram":
-                        ////this.HandleSocialSendInstagram((JToken)jobject);
-                        break;
-                    case "audioRequest":
-                        ////this.HandleAudioRequest();
-                        break;
-                    case "audioCurrentSong":
-                        ////this.HandleAudioCurrentSong();
-                        break;
-                    case "audioStartCue":
-                        ////this.HandleAudioStartCue((JToken)jobject);
-                        break;
-                    case "audioPlayPause":
-                        ////this.HandleAudioPlayPause();
-                        break;
-                    case "audioIsPlaying":
-                        ////this.HandleAudioIsPlaying();
-                        break;
-                    case "mediaRequest":
-                        ////this.HandleMediaRequest();
-                        break;
-                    case "telestratorSettings":
-                        ////this.HandleTelestratorSettings();
-                        break;
-                    case "telestratorEndEditing":
-                        ////this.HandleTelestratorEndEditing();
-                        break;
-                    case "clearTelestrator":
-                        ////this.HandleClearTelestrator();
-                        break;
-                    case "telestratorSet":
-                        ////this.HandleTelestratorSet((JToken)jobject);
-                        break;
-                    case "telestratorUndo":
-                        ////this.HandleTelestratorUndo();
-                        break;
-                    case "telestratorNew":
-                        ////this.HandleTelestratorNew((JToken)jobject);
                         break;
                 }
             }
